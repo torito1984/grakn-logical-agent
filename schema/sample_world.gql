@@ -1,0 +1,41 @@
+## First we mount the machine
+
+# Auxiliary no-val to mark missing observable
+insert $n isa no-val, has uuid 'no-val';
+
+# Sensors
+insert $d isa dirt-sensor;
+insert $l isa location-sensor;
+insert $bs isa bump-sensor;
+
+insert $os isa order-sensor;
+
+# Actuators and actions
+insert $b isa brush;
+insert $h isa brush-hoover;
+
+insert $w isa wheel;
+insert $a isa wheel-advance;
+insert $r isa wheel-rotate-right;
+insert $r isa wheel-rotate-left;
+
+# Now we initiate the sensors: we do not know anything about the world
+match
+ $d isa dirt-sensor;
+ $n isa no-val;
+insert (input: $d, prev : $n, observed: $n, next: $n) isa sense;
+
+match
+ $d isa location-sensor;
+ $n isa no-val;
+insert (input: $d, prev : $n, observed: $n, next: $n) isa sense;
+
+match
+ $d isa bump-sensor;
+ $n isa no-val;
+insert (input: $d, prev : $n, observed: $n, next: $n) isa sense;
+
+match
+ $d isa order-sensor;
+ $n isa no-val;
+insert (input: $d, prev : $n, observed: $n, next: $n) isa sense;

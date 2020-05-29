@@ -1,0 +1,166 @@
+# Copyright 2020 DataSpartan
+
+####### Abstract woolridge agent
+
+define
+
+sensor sub entity,
+    plays input;
+
+sense sub relation,
+    relates input,
+    relates observed,
+    relates prev,
+    relates next;
+
+uuid sub attribute,
+    datatype string;
+
+observable sub entity,
+    key uuid,
+    plays observed,
+    plays prev,
+    plays next;
+
+no-val sub observable;
+
+action sub entity,
+    plays what;
+
+do sub relation,
+    relates what,
+    relates on;
+
+actuator sub entity,
+    plays on;
+
+
+####### Wumpus agent
+
+x sub attribute,
+    datatype long;
+
+y sub attribute,
+    datatype long;
+
+dirt-sensor sub sensor;
+dirt-value sub observable,
+    has x,
+    has y;
+dirty sub dirt-value;
+clean sub dirt-value;
+
+location-sensor sub sensor;
+location-value sub observable,
+    has x,
+    has y;
+
+bump-sensor sub sensor;
+bump-value sub observable;
+can-advance sub bump-value;
+blocked sub bump-value;
+
+order-sensor sub sensor;
+order-value sub observable;
+stop sub order-value;
+work sub order-value;
+
+wheel sub actuator;
+wheel-advance sub action;
+wheel-rotate-right sub action;
+wheel-rotate-left sub action;
+
+brush sub actuator;
+brush-hoover sub action;
+
+################ RULES
+
+clean-if-dirty sub rule,
+  when {
+    $d isa dirt-sensor;
+    $l isa location-sensor;
+    $ds isa dirty, has x $x, has y $y;
+    $p isa location-value, has x $x, has y $y;
+    $n isa no-val;
+    (input: $d, observed: $ds, next: $n) isa sense;
+    (input: $l, observed: $p, next: $n) isa sense;
+
+    $os isa order-sensor;
+    $o isa work;
+    (input: $os, observed: $o, next: $n) isa sense;
+
+    $b isa brush;
+    $h isa brush-hoover;
+  }, then {
+    (what: $h, on: $b) isa do;
+  };
+
+rotate-right-if-clean sub rule,
+  when {
+    $n isa no-val;
+
+    $d isa dirt-sensor;
+    $ds isa clean, has x $x, has y $y;
+    (input: $d, observed: $ds, next: $n) isa sense;
+
+    $l isa location-sensor;
+    $p isa location-value, has x $x, has y $y;
+    (input: $l, observed: $p, next: $n) isa sense;
+
+    $os isa order-sensor;
+    $o isa work;
+    (input: $os, observed: $o, next: $n) isa sense;
+
+    $w isa wheel;
+    $r isa wheel-rotate-right;
+  }, then {
+    (what: $r, on: $w) isa do;
+  };
+
+rotate-left-if-clean sub rule,
+  when {
+    $n isa no-val;
+
+    $d isa dirt-sensor;
+    $ds isa clean, has x $x, has y $y;
+    (input: $d, observed: $ds, next: $n) isa sense;
+
+    $l isa location-sensor;
+    $p isa location-value, has x $x, has y $y;
+    (input: $l, observed: $p, next: $n) isa sense;
+
+    $os isa order-sensor;
+    $o isa work;
+    (input: $os, observed: $o, next: $n) isa sense;
+
+    $w isa wheel;
+    $r isa wheel-rotate-left;
+  }, then {
+    (what: $r, on: $w) isa do;
+  };
+
+advance-if-clean sub rule,
+  when {
+    $n isa no-val;
+
+    $d isa dirt-sensor;
+    $ds isa clean, has x $x, has y $y;
+    (input: $d, observed: $ds, next: $n) isa sense;
+
+    $l isa location-sensor;
+    $p isa location-value, has x $x, has y $y;
+    (input: $l, observed: $p, next: $n) isa sense;
+
+    $b isa bump-sensor;
+    $adv isa can-advance;
+    (input: $b, observed: $adv, next: $n) isa sense;
+
+    $os isa order-sensor;
+    $o isa work;
+    (input: $os, observed: $o, next: $n) isa sense;
+
+    $w isa wheel;
+    $r isa wheel-advance;
+  }, then {
+    (what: $r, on: $w) isa do;
+  };
